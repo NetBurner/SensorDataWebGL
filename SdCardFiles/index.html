@@ -1,0 +1,136 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=utf-8>
+    <title>Sensor Data Visualization App</title>
+    <style>
+        body {
+            margin: 0;
+        }
+        canvas {
+            width: 100%;
+            height: 100%
+        }
+    </style>
+</head>
+<body>
+    <script src="js/three.min.js"></script>
+    <script src="js/inflate.min.js"></script>
+    <script src="js/GLTFLoader.js"></script>
+    <script src="js/OrbitControls.js"></script>
+    <script>
+        var rotX = 0.0;
+        var rotY = 0.0;
+        var rotZ = 0.0;
+
+        var posX = 0.0;
+        var posY = 0.0;
+        var posZ = 0.0;
+
+        var ws;
+
+        var gadget;
+        var loadedGadget = false;
+
+        // WebSocket Magic
+        function CreateWebSocket() {
+            if ("WebSocket" in window) {
+                if ((ws == null) || (ws.readyState == WebSocket.CLOSED)) {
+                    ws = new WebSocket("ws://" + window.location.hostname + "/INDEX");
+                    ws.onopen = function () { };
+                    ws.onmessage = function (evt) {
+                        var updateData = JSON.parse(evt.data);
+                        posX = updateData.PosUpdate.x;
+                        posY = updateData.PosUpdate.y;
+                        posZ = updateData.PosUpdate.z;
+                        rotX = updateData.RotUpdate.x;
+                        rotY = updateData.RotUpdate.y;
+                        rotZ = updateData.RotUpdate.z;
+                        console.log("Got new values!");
+                        console.log("    " + posX + " " + posY + " " + posZ);
+                        console.log("    " + rotX + " " + rotY + " " + rotZ);
+
+                    }
+                    ws.onclose = function () { };
+                }
+            }
+        }
+
+        // Three.js and WebGL goodness
+        function animate() {
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
+            requestAnimationFrame(animate);
+
+            // Animate our gadget
+            if (loadedGadget) {
+                gadget.rotation.x = rotX;
+                gadget.rotation.y = rotY;
+                gadget.rotation.z = rotZ;
+
+                gadget.position.x = posX;
+                gadget.position.y = posY;
+                gadget.position.z = posZ;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Setup scene, camera, and the renderer
+        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+        camera.position.y = 2.8;
+        camera.position.z = 5;
+
+        var scene = new THREE.Scene();
+
+        var light = new THREE.HemisphereLight(0xffffff, 0x444444);
+        light.position.set(0, 200, 0);
+
+        var lightDir = new THREE.PointLight(0xffffff, 2, 150, 1);
+        lightDir.position.set(0, 25, 0);
+
+        scene.add(light);
+        scene.add(lightDir);
+
+        var controls = new THREE.OrbitControls(camera);
+        controls.update();
+
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Make the ground plane
+        var geo = new THREE.PlaneBufferGeometry(2000, 2000, 8, 8);
+        var mat = new THREE.MeshBasicMaterial({ color: 0xb6b7b3, side: THREE.DoubleSide });
+        var plane = new THREE.Mesh(geo, mat);
+        plane.position.y = -4.0;
+        plane.rotateX(- Math.PI / 2);
+
+        scene.add(plane);
+
+        var gltfLoader = new THREE.GLTFLoader();
+        gltfLoader.load('assets/GadgetPainted.gltf', function (gltf) {
+            gadget = gltf.scene;
+            scene.add(gadget);
+
+            gltf.scene;
+            gltf.scenes;
+            gltf.asset;
+            gltf.animations;
+            gltf.cameras;
+
+            loadedGadget = true;
+        },
+        // called while loading is progressing
+        function (xhr) {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        },
+        // called when loading has errors
+        function (error) {
+            console.log('An error happened: ' + error);
+        });
+
+        animate();
+        CreateWebSocket();
+    </script>
+</body>
+</html>
