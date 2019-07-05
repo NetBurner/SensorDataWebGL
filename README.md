@@ -1,0 +1,1 @@
+This is part of a tutorial found on www.netburner.com. Read the companion tutoirial [Part II: WebSockets for Real-Time Web and IoT Applications – Controlling Your NetBurner with WebSockets Interface](https://www.netburner.com/learn/part-ii-websockets-for-real-time-web-and-iot-applications-controlling-your-netburner-with-websockets-interface/)
