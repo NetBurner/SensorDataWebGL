@@ -1,3 +1,4 @@
+# Visualizing Sensor Data with WebGL and WebSockets
 This example shows how you can utilize WebGL with Three.js to visualize real-time sensor data from your NetBurner device over a WebSocket connection.
 <br><br>
 The code and steps required for setup detailed in the article, [Visualizing Sensor Data with WebGL and WebSocket](https://www.netburner.com/learn/visualizing-sensor-data-with-webgl-and-websockets/),
